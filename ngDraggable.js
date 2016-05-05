@@ -44,6 +44,12 @@ angular.module("ngDraggable", [])
                 var onDragStartCallback = $parse(attrs.ngDragStart) || null;
                 var onDragStopCallback = $parse(attrs.ngDragStop) || null;
                 var onDragSuccessCallback = $parse(attrs.ngDragSuccess) || null;
+                var constX = angular.isDefined(attrs.constX) ? scope.$eval(attrs.constX) : false;
+                var constY = angular.isDefined(attrs.constY) ? scope.$eval(attrs.constY) : false;
+                var minX = angular.isDefined(attrs.minX) ? scope.$eval(attrs.minX) : -Infinity;
+                var minY = angular.isDefined(attrs.minY) ? scope.$eval(attrs.minY) : -Infinity;
+                var maxX = angular.isDefined(attrs.maxX) ? scope.$eval(attrs.maxX) : Infinity;
+                var maxY = angular.isDefined(attrs.maxY) ? scope.$eval(attrs.maxY) : Infinity;
                 var allowTransform = angular.isDefined(attrs.allowTransform) ? scope.$eval(attrs.allowTransform) : true;
 
                 var getDragData = $parse(attrs.ngDragData);
@@ -246,7 +252,10 @@ angular.module("ngDraggable", [])
                 };
 
                 var moveElement = function (x, y) {
+                    if (x < minX || x > maxX || y < minY || y > maxY) return; //TODO::better implementation
                     if(allowTransform) {
+                        if (constX == true) x = 0;
+                        if (constY == true) y = 0;
                         element.css({
                             transform: 'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, ' + x + ', ' + y + ', 0, 1)',
                             'z-index': 99999,
@@ -254,6 +263,8 @@ angular.module("ngDraggable", [])
                             '-ms-transform': 'matrix(1, 0, 0, 1, ' + x + ', ' + y + ')'
                         });
                     }else{
+                        if (constX == true) x = element.clientLeft;
+                        if (constY == true) y = element.clientTop;
                         element.css({'left':x+'px','top':y+'px', 'position':'fixed'});
                     }
                 };
